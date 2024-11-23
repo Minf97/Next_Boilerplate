@@ -2,26 +2,36 @@ name: Deploy to Tencent Cloud
 
 on:
   push:
-    branches: [ main ]  # 当 main 分支有推送时触发
+    branches: [main] # 当 main 分支有推送时触发
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       # 设置 Node.js 环境
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          
+          node-version: "18"
+
       # 构建 Docker 镜像
       - name: Build Docker image
         run: |
           docker build -t next-boilerplate:latest .
           docker save next-boilerplate:latest > image.tar
-          
+
+      # 在 Deploy to Tencent Cloud 步骤之前添加测试步骤
+      - name: Check if secret exists
+        run: |
+          if [ -n "${{ secrets.TENCENT_PRIVATE_KEY }}" ]; then
+            echo "Private key is set and not empty"
+            echo "Length of TENCENT_HOST: $(echo '${{ secrets.TENCENT_HOST }}' | wc -c)"
+          else
+            echo "Private key is not set or empty"
+          fi
+
       # 部署到腾讯云
       - name: Deploy to Tencent Cloud
         uses: appleboy/scp-action@master
@@ -29,16 +39,20 @@ jobs:
           host: ${{ secrets.TENCENT_HOST }}
           username: root
           key: ${{ secrets.TENCENT_PRIVATE_KEY }}
+          port: 22
+          strip_components: 0
           source: "image.tar,docker-compose.yml"
           target: "/opt/next-boilerplate"
           debug: true
-          
+
       # 在服务器上运行部署脚本
       - name: Execute deploy script
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.TENCENT_HOST }}
+          username: root
           key: ${{ secrets.TENCENT_PRIVATE_KEY }}
+          port: 22
           script: |
             cd /opt/next-boilerplate
             docker load < image.tar
