@@ -26,18 +26,15 @@ jobs:
       # 构建 Docker 镜像
       - name: Build Docker image
         run: |
-          docker build -t your-app-name:latest .
-          docker save your-app-name:latest > image.tar
+          docker build -t next-boilerplate:latest .
+          docker save next-boilerplate:latest > image.tar
           
       # 部署到腾讯云
       - name: Deploy to Tencent Cloud
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.TENCENT_HOST }}
-          username: ${{ secrets.TENCENT_USERNAME }}
-          password: ${{ secrets.TENCENT_PASSWORD }}
-          # 如果使用 SSH key
-          # key: ${{ secrets.TENCENT_PRIVATE_KEY }}
+          key: ${{ secrets.TENCENT_PRIVATE_KEY }}
           source: "image.tar,docker-compose.yml"
           target: "/opt/next-boilerplate"
           
@@ -46,12 +43,9 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.TENCENT_HOST }}
-          username: ${{ secrets.TENCENT_USERNAME }}
-          password: ${{ secrets.TENCENT_PASSWORD }}
-          # 如果使用 SSH key
-          # key: ${{ secrets.TENCENT_PRIVATE_KEY }}
+          key: ${{ secrets.TENCENT_PRIVATE_KEY }}
           script: |
-            cd /root/app
+            cd /opt/next-boilerplate
             docker load < image.tar
             docker-compose down
             docker-compose up -d
