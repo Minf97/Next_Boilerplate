@@ -27,9 +27,11 @@ jobs:
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.TENCENT_HOST }}
+          username: root
           key: ${{ secrets.TENCENT_PRIVATE_KEY }}
           source: "image.tar,docker-compose.yml"
           target: "/opt/next-boilerplate"
+          debug: true
           
       # 在服务器上运行部署脚本
       - name: Execute deploy script
