@@ -8,9 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky install",
-    "commit": "cz",
-    "release:alpha": "standard-version --prerelease alpha",
-    "release": "standard-version"
+    "commit": "cz"
   },
   "dependencies": {
     "cz-customizable": "^7.4.0",
