@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ "$BRANCH" = "develop" ]; then
+  npm run release:alpha
+elif [ "$BRANCH" = "main" ]; then
+  npm run release
+fi
+
+git push --follow-tags origin $BRANCH 

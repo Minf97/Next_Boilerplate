@@ -22,38 +22,6 @@ jobs:
           docker build -t next-boilerplate:latest .
           docker save next-boilerplate:latest > image.tar
 
-      # 在 Deploy to Tencent Cloud 步骤之前添加测试步骤
-      - name: Check if secret exists
-        run: |
-          if [ -n "${{ secrets.TENCENT_PRIVATE_KEY }}" ]; then
-            echo "Private key is set and not empty"
-            echo "Length of TENCENT_HOST: $(echo '${{ secrets.TENCENT_HOST }}' | wc -c)"
-          else
-            echo "Private key is not set or empty"
-          fi
-
-      - name: Debug SSH Connection
-        run: |
-          # 创建 SSH 配置目录
-          mkdir -p ~/.ssh
-          
-          # 写入私钥用于测试（注意这里仅用于调试）
-          echo "${{ secrets.TENCENT_PRIVATE_KEY }}" > ~/.ssh/test_key
-          chmod 600 ~/.ssh/test_key
-          
-          # 检查私钥格式
-          echo "=== 检查私钥头部 ==="
-          head -n 1 ~/.ssh/test_key
-          echo "=== 检查私钥尾部 ==="
-          tail -n 1 ~/.ssh/test_key
-          
-          # 测试 SSH 连接
-          echo "=== 测试 SSH 连接 ==="
-          ssh -i ~/.ssh/test_key -o StrictHostKeyChecking=no -T root@${{ secrets.TENCENT_HOST }} "echo 连接成功" || echo "SSH 连接失败"
-          
-          # 清理测试文件
-          rm ~/.ssh/test_key
-
       # 部署到腾讯云
       - name: Deploy to Tencent Cloud
         uses: appleboy/scp-action@master
